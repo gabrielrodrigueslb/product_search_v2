@@ -17,7 +17,7 @@ export class BancoUnicoProvider {
     try {
       const response = await this.api.post('/api/products/search', {
         query,
-        limit: 10
+        limit: 50
       });
 
       const results = Array.isArray(response.data?.results)

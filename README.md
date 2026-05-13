@@ -42,6 +42,8 @@ Crie um `.env` com base no `.env.example`.
 - `PORT`: porta local da API
 - `BANCO_UNICO_API_BASE_URL`: base URL do Banco Único
 - `VETOR_API_BASE_URL`: base URL da Vetor
+- `VETOR_MAX_EANS_PER_REQUEST`: quantidade de EANs por lote enviado para a Vetor
+- `VETOR_MAX_PARALLEL_REQUESTS`: quantidade máxima de lotes consultados em paralelo
 
 ## Execução
 

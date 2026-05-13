@@ -4,7 +4,8 @@ import { mapVetorProduct } from './vetor.mapper.js';
 
 const DEFAULT_BASE_URL = 'https://integracao.zetti.dev';
 const PRODUTOS_CONSULTA_PATH = '/api/ecommerce/produtos/consulta';
-const MAX_EANS_PER_REQUEST = 10;
+const DEFAULT_MAX_EANS_PER_REQUEST = process.env.VETOR_MAX_EANS_PER_REQUEST || 15;
+const DEFAULT_MAX_PARALLEL_REQUESTS = process.env.VETOR_MAX_PARALLEL_REQUESTS || 4;
 
 function escapeODataString(value) {
   return String(value || '').replace(/'/g, "''");
@@ -41,9 +42,34 @@ function buildConsultaFilter(eans, cdfilial) {
   return filters.join(' and ');
 }
 
+async function runWithConcurrencyLimit(items, limit, worker) {
+  const results = new Array(items.length);
+  let cursor = 0;
+
+  async function runWorker() {
+    while (true) {
+      const currentIndex = cursor;
+      cursor += 1;
+
+      if (currentIndex >= items.length) {
+        return;
+      }
+
+      results[currentIndex] = await worker(items[currentIndex], currentIndex);
+    }
+  }
+
+  const workerCount = Math.max(1, Math.min(limit, items.length));
+  await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
+
+  return results;
+}
+
 export class VetorProvider {
   constructor() {
     this.baseURL = process.env.VETOR_API_BASE_URL || DEFAULT_BASE_URL;
+    this.maxEansPerRequest = Number(process.env.VETOR_MAX_EANS_PER_REQUEST) || DEFAULT_MAX_EANS_PER_REQUEST;
+    this.maxParallelRequests = Number(process.env.VETOR_MAX_PARALLEL_REQUESTS) || DEFAULT_MAX_PARALLEL_REQUESTS;
   }
 
   createClient(vetorToken) {
@@ -54,6 +80,19 @@ export class VetorProvider {
         Authorization: `ApiKey ${vetorToken}`
       }
     });
+  }
+
+  async fetchChunk(api, chunk, cdfilial) {
+    const response = await api.get(PRODUTOS_CONSULTA_PATH, {
+      params: {
+        $filter: buildConsultaFilter(chunk, cdfilial),
+        $top: 500
+      }
+    });
+
+    return Array.isArray(response.data?.data)
+      ? response.data.data
+      : [];
   }
 
   async searchByEans(eans, options = {}) {
@@ -77,25 +116,16 @@ export class VetorProvider {
 
     try {
       const api = this.createClient(vetorToken);
-      const chunks = splitInChunks(uniqueEans, MAX_EANS_PER_REQUEST);
-      const allItems = [];
+      const chunks = splitInChunks(uniqueEans, this.maxEansPerRequest);
+      const chunkResults = await runWithConcurrencyLimit(
+        chunks,
+        this.maxParallelRequests,
+        chunk => this.fetchChunk(api, chunk, cdfilial)
+      );
 
-      for (const chunk of chunks) {
-        const response = await api.get(PRODUTOS_CONSULTA_PATH, {
-          params: {
-            $filter: buildConsultaFilter(chunk, cdfilial),
-            $top: 500
-          }
-        });
-
-        const items = Array.isArray(response.data?.data)
-          ? response.data.data
-          : [];
-
-        allItems.push(...items);
-      }
-
-      return allItems.map(mapVetorProduct);
+      return chunkResults
+        .flat()
+        .map(mapVetorProduct);
     } catch (error) {
       const status = error?.response?.status;
       const responseMessage = error?.response?.data?.msg || error?.response?.data?.message;
