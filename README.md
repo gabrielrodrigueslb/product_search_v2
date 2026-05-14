@@ -2,6 +2,14 @@
 
 API Node.js para buscar produtos no Banco Único, cruzar por EAN na Vetor e retornar apenas os produtos encontrados no cliente.
 
+## Documentacao detalhada
+
+Para uma explicacao completa da arquitetura e do passo a passo interno da busca, consulte [`docs/fluxo-e-arquitetura.md`](docs/fluxo-e-arquitetura.md).
+
+## Automacao de avaliacao
+
+Para testar a busca a partir de atendimentos reais de omnichannel usando IA para extrair o produto pedido e gerar artefatos em `JSON/CSV`, consulte [`docs/automacao-avaliacao-omnichannel.md`](docs/automacao-avaliacao-omnichannel.md).
+
 ## Estrutura de rotas
 
 A API agora usa rotas por provider para facilitar a entrada de novos conectores no futuro.
@@ -84,7 +92,7 @@ Content-Type: application/json
 
 - `query`: obrigatório, texto da busca
 - `vetorToken`: obrigatório, token da Vetor
-- `cdfilial`: opcional, filial específica para consultar estoque e preço
+- `cdfilial`: obrigatório no fluxo interno; se não for enviado, a API assume `1`
 
 Exemplo:
 
@@ -92,7 +100,7 @@ Exemplo:
 {
   "query": "dipirona",
   "vetorToken": "SEU_TOKEN_DA_VETOR",
-  "cdfilial": 3
+  "cdfilial": 1
 }
 ```
 

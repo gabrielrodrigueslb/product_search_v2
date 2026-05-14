@@ -21,6 +21,15 @@ function splitInChunks(items, chunkSize) {
   return chunks;
 }
 
+function parseOptionalInteger(value) {
+  if (value == null || String(value).trim() === '') {
+    return 1;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) ? parsed : 1;
+}
+
 function buildCodigoBarrasFilter(eans) {
   return eans
     .map(ean => `codigoBarras eq '${escapeODataString(ean)}'`)
@@ -65,6 +74,12 @@ async function runWithConcurrencyLimit(items, limit, worker) {
   return results;
 }
 
+function flattenVetorResponseItems(response) {
+  return Array.isArray(response.data?.data)
+    ? response.data.data
+    : [];
+}
+
 export class VetorProvider {
   constructor() {
     this.baseURL = process.env.VETOR_API_BASE_URL || DEFAULT_BASE_URL;
@@ -90,16 +105,30 @@ export class VetorProvider {
       }
     });
 
-    return Array.isArray(response.data?.data)
-      ? response.data.data
-      : [];
+    return flattenVetorResponseItems(response);
+  }
+
+  async fetchChunkWithFallback(api, chunk, cdfilial) {
+    const items = await this.fetchChunk(api, chunk, cdfilial);
+
+    if (items.length > 0 || chunk.length <= 1) {
+      return items;
+    }
+
+    console.warn(
+      `Consulta Vetor em lote retornou vazia para ${chunk.length} EANs; tentando fallback individual.`
+    );
+
+    const fallbackResults = await Promise.all(
+      chunk.map(ean => this.fetchChunk(api, [ean], cdfilial))
+    );
+
+    return fallbackResults.flat();
   }
 
   async searchByEans(eans, options = {}) {
     const vetorToken = String(options?.vetorToken || '').trim();
-    const cdfilial = Number.isInteger(Number(options?.cdfilial))
-      ? Number(options.cdfilial)
-      : null;
+    const cdfilial = parseOptionalInteger(options?.cdfilial);
     const uniqueEans = [...new Set(
       (Array.isArray(eans) ? eans : [])
         .map(value => String(value || '').trim())
@@ -120,7 +149,7 @@ export class VetorProvider {
       const chunkResults = await runWithConcurrencyLimit(
         chunks,
         this.maxParallelRequests,
-        chunk => this.fetchChunk(api, chunk, cdfilial)
+        chunk => this.fetchChunkWithFallback(api, chunk, cdfilial)
       );
 
       return chunkResults

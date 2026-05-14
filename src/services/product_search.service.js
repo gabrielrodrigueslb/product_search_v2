@@ -7,7 +7,7 @@ export class ProductSearchService {
     this.productEnrichmentService = productEnrichmentService;
   }
 
-  async search({ query, vetorToken, cdfilial = null }) {
+  async search({ query, vetorToken, cdfilial = 1 }) {
     const bancoUnicoProducts = await this.bancoUnicoProvider.searchByName(query);
 
     if (!Array.isArray(bancoUnicoProducts) || bancoUnicoProducts.length === 0) {

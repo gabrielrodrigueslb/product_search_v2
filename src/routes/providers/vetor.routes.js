@@ -24,3 +24,10 @@ router.post('/products/search', async (req, res) => {
 });
 
 export default router;
+
+
+
+
+
+
+

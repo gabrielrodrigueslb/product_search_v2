@@ -1,4 +1,15 @@
-﻿export class ProductController {
+﻿const DEFAULT_CDFILIAL = 1;
+
+function parseCdfilial(value) {
+  if (value == null || String(value).trim() === '') {
+    return DEFAULT_CDFILIAL;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) ? parsed : null;
+}
+
+export class ProductController {
   constructor(productSearchService) {
     this.productSearchService = productSearchService;
   }
@@ -25,11 +36,9 @@
 
       const filialValue = cdfilial ?? cdFilial;
 
-      if (
-        filialValue != null
-        && String(filialValue).trim() !== ''
-        && !Number.isInteger(Number(filialValue))
-      ) {
+      const parsedFilial = parseCdfilial(filialValue);
+
+      if (parsedFilial == null) {
         return res.status(400).json({
           found: false,
           products: [],
@@ -40,9 +49,7 @@
       const result = await this.productSearchService.search({
         query: String(query).trim(),
         vetorToken: String(vetorToken).trim(),
-        cdfilial: filialValue == null || String(filialValue).trim() === ''
-          ? null
-          : Number(filialValue)
+        cdfilial: parsedFilial
       });
 
       if (!result.found) {
