@@ -18,7 +18,7 @@ Em termos simples, o fluxo e:
 O endpoint principal e:
 
 ```http
-POST /providers/vetor/products/search
+POST /providers/vetor/products/search/semantic
 ```
 
 Ele espera um corpo JSON com:
@@ -122,7 +122,7 @@ Transforma dois conjuntos de dados em uma lista final de produtos:
 
 Implementa a integracao com o Banco Unico:
 
-- faz `POST /api/products/search`
+- faz `POST /api/products/search/semantic`
 - envia `query` e `limit: 50`
 - transforma o retorno bruto em um modelo interno mais previsivel
 
@@ -151,7 +151,7 @@ Funcionam como contratos abstratos para indicar a interface esperada dos provide
 O cliente chama:
 
 ```http
-POST /providers/vetor/products/search
+POST /providers/vetor/products/search/semantic
 Content-Type: application/json
 ```
 
@@ -183,7 +183,7 @@ O provider do Banco Unico:
 
 - usa `axios`
 - aponta para `BANCO_UNICO_API_BASE_URL`
-- faz `POST /api/products/search`
+- faz `POST /api/products/search/semantic`
 - envia:
 
 ```json
@@ -375,7 +375,7 @@ sequenceDiagram
     participant VT as VetorProvider
     participant ENR as ProductEnrichmentService
 
-    C->>API: POST /providers/vetor/products/search
+    C->>API: POST /providers/vetor/products/search/semantic
     API->>API: valida query, token e filial
     API->>BUSCA: search(query, vetorToken, cdfilial)
     BUSCA->>BU: searchByName(query)
@@ -428,7 +428,7 @@ Hoje, porem, a rota ativa no servidor e apenas a da Vetor.
 
 ## Pecas que existem mas nao participam do fluxo atual
 
-Alguns arquivos estao no repositorio, mas nao entram no caminho principal executado por `POST /providers/vetor/products/search`:
+Alguns arquivos estao no repositorio, mas nao entram no caminho principal executado por `POST /providers/vetor/products/search/semantic`:
 
 - `src/services/product_equivalence.service.js`
 - `src/services/banco-unico-product.service.js`

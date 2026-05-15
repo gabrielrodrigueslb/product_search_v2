@@ -17,7 +17,7 @@ function parseOptionalInteger(value) {
 export class ProductSearchClient {
   constructor(config = {}) {
     this.baseUrl = config.baseUrl;
-    this.path = config.path || '/providers/vetor/products/search';
+    this.path = config.path || '/providers/vetor/products/search/semantic';
     this.vetorToken = config.vetorToken;
     this.cdfilial = config.cdfilial ?? 1;
     this.timeout = numberFromEnv(config.timeout, 30000);

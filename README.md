@@ -17,7 +17,7 @@ A API agora usa rotas por provider para facilitar a entrada de novos conectores 
 ### Vetor
 
 ```http
-POST /providers/vetor/products/search
+POST /providers/vetor/products/search/semantic
 ```
 
 ## Fluxo
@@ -84,7 +84,7 @@ Resposta:
 ## Endpoint da Vetor
 
 ```http
-POST /providers/vetor/products/search
+POST /providers/vetor/products/search/semantic
 Content-Type: application/json
 ```
 
