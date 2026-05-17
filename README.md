@@ -49,6 +49,8 @@ Crie um `.env` com base no `.env.example`.
 
 - `PORT`: porta local da API
 - `BANCO_UNICO_API_BASE_URL`: base URL do Banco Único
+- `BANCO_UNICO_TIMEOUT_MS`: timeout da busca no Banco Único
+- `BANCO_UNICO_SEARCH_LIMIT`: quantidade máxima de itens pedidos ao Banco Único por busca
 - `VETOR_API_BASE_URL`: base URL da Vetor
 - `VETOR_MAX_EANS_PER_REQUEST`: quantidade de EANs por lote enviado para a Vetor
 - `VETOR_MAX_PARALLEL_REQUESTS`: quantidade máxima de lotes consultados em paralelo
@@ -138,7 +140,9 @@ Também é aceito `cdFilial` no lugar de `cdfilial`.
         "fabricante": "Prati Donaduzzi & CIA Ltda",
         "similarity": 0.6081256867172622,
         "token_overlap": 5,
-        "exact_ean_match": false
+        "exact_ean_match": false,
+        "relevanceScore": 3,
+        "relevanceReason": "Relacionado ao termo buscado com relevancia moderada."
       },
       "precos": {
         "preco_venda": 24.98,

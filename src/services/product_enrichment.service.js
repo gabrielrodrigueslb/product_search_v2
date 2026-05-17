@@ -89,7 +89,9 @@ export class ProductEnrichmentService {
           fabricante: bancoUnicoProduct.fabricante || null,
           similarity: bancoUnicoProduct.similarity ?? null,
           token_overlap: bancoUnicoProduct.tokenOverlap ?? null,
-          exact_ean_match: bancoUnicoProduct.exactEanMatch === true
+          exact_ean_match: bancoUnicoProduct.exactEanMatch === true,
+          relevanceScore: bancoUnicoProduct.relevanceScore ?? null,
+          relevanceReason: bancoUnicoProduct.relevanceReason ?? null
         },
         ...(Object.keys(precos).length > 0 ? { precos } : {})
       });

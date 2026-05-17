@@ -10,6 +10,8 @@
     similarity: item?.similarity ?? null,
     tokenOverlap: item?.tokenOverlap ?? null,
     exactEanMatch: item?.exactEanMatch === true,
+    relevanceScore: item?.relevanceScore ?? null,
+    relevanceReason: item?.relevanceReason ?? null,
     detalhes: item?.detalhes || null,
     raw: item
   };
